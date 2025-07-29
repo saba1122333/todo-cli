@@ -22,8 +22,17 @@ func main() {
 		err = cli.HandleAddCommand()
 	case "delete":
 		err = cli.HandleDeleteCommand()
+	case "update":
+		err = cli.HandleUpdateCommand()
+	case "list":
+		err = cli.HandleListCommand()
+	case "mark-in-progress":
+		err = cli.HandleMarkInProgressCommand()
+	case "mark-Done":
+		err = cli.HandleMarkDoneCommand()
+	default:
+		err = fmt.Errorf("unknown command: %s", command)
 	}
-
 	if err != nil {
 		fmt.Printf("Error : %v\n", err)
 		os.Exit(1)

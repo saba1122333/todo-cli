@@ -15,10 +15,10 @@ func HandleDeleteCommand() error {
 	}
 	idStr := strings.TrimSpace(os.Args[2])
 	id, err := strconv.Atoi(idStr)
-
 	if err != nil {
 		return fmt.Errorf("Invalid ID, please provide a valid number")
 	}
+
 	return task.DeleteTask(id)
 }
 
@@ -30,5 +30,51 @@ func HandleAddCommand() error {
 	if len(description) == 0 {
 		return fmt.Errorf("Description cannot be empty.")
 	}
-	return task.Add(description)
+	return task.AppendTask(description)
+}
+
+func HandleUpdateCommand() error {
+	if len(os.Args) != 4 {
+		return fmt.Errorf("Wrong number of arguments")
+	}
+	idStr, description := strings.TrimSpace(os.Args[2]), strings.TrimSpace(os.Args[3])
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return fmt.Errorf("Invalid ID, please provide valid number")
+	}
+	return task.UpdateTask(id, description)
+}
+func HandleListCommand() error {
+	if len(os.Args) == 2 {
+		return task.ListTasks("all")
+	}
+	if len(os.Args) == 3 {
+		status := os.Args[2]
+		return task.ListTasks(status)
+	}
+	return fmt.Errorf("Wrong number of arguments")
+}
+
+func HandleMarkInProgressCommand() error {
+	if len(os.Args) != 3 {
+		return fmt.Errorf("Wrong number of arguments")
+	}
+	idStr := strings.TrimSpace(os.Args[2])
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return fmt.Errorf("Invalid ID, please provide valid number")
+	}
+	return task.MarkTaskInProgress(id)
+}
+
+func HandleMarkDoneCommand() error {
+	if len(os.Args) != 3 {
+		return fmt.Errorf("Wrong number of arguments")
+	}
+	idStr := strings.TrimSpace(os.Args[2])
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return fmt.Errorf("Invalid ID, please provide valid number")
+	}
+	return task.MarkTaskDone(id)
 }

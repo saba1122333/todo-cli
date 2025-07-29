@@ -1,5 +1,7 @@
 package task
 
+import "fmt"
+
 type Status string
 
 const (
@@ -14,4 +16,11 @@ type Task struct {
 	Status      Status `json:"status"`
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
+}
+
+func (t Task) String() string {
+	return fmt.Sprintf(
+		"ID: %d\nDescription: %s\nStatus: %s\nCreated At: %s\nUpdated At: %s",
+		t.ID, t.Description, t.Status, t.CreatedAt, t.UpdatedAt,
+	)
 }
