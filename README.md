@@ -17,52 +17,52 @@ A simple command-line task management tool written in Go. Store, track, and mana
 - Go 1.24.5 or higher
 
 ### Build from Source 
-```bash
+```
 git clone https://github.com/saba1122333/todo-cli
 cd todo-cli 
 go build -o todo-cli
-```bash
+```
 
 ### Run directly
-```bash 
+``` 
 go run main.go [command] [arguments]
-```bash 
+``` 
 
 ## Usage 
 
 # Adding a new task
-```bash 
+``` 
 go run main.go add "Buy groceries"
-```bash 
+```
 
 
 # Deleting Task 
-```bash 
+``` 
 go run main.go delete 1 
-```bash 
+``` 
 
 # Update Task
-```bash 
+``` 
 go run main.go update 1 "Buy groceries and cook dinner"
-```bash 
+``` 
 
 # Marking a task as in progress or done
-```bash 
+``` 
 go run main.go mark-in-progress 1 
-go run main.go done 1 
-```bash 
+go run main.go mark-done 1 
+``` 
 
 # List 
 ```bash 
 go run main.go list
-```bash 
+``` 
 
 # List by status 
-```bash 
+``` 
 go run main.go list todo 
 go run main.go list in-progress
 go run main.go list Done
-```bash
+```
 
 ## Data storage 
 
