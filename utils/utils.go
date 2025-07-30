@@ -13,9 +13,8 @@ func fileExists() bool {
 func CheckOrCreate() {
 	if !fileExists() {
 		file, err := os.Create(task.FileName)
-		if err != nil {
-			// Don't loop forever. Just fail fast.
-			panic("failed to create file: " + err.Error())
+		for err != nil {
+			file, err = os.Create(task.FileName)
 		}
 		defer file.Close()
 	}

@@ -15,5 +15,5 @@ const (
 	SucTaskAdded   = "Task Added successfully (ID:%v)"
 	SucTaskDeleted = "Task Deleted successfully (ID:%v)"
 	SucTaskUpdated = "Task Updated successfully (ID:%v)"
-	sucTaskMarked  = "Task Marked successfully (ID:%v)"
+	SucTaskMarked  = "Task Marked successfully (ID:%v)"
 )

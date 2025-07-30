@@ -113,7 +113,7 @@ func MarkTask(id int, status Status) error {
 	return ApplyTaskByID(id, func(task *Task) error {
 		task.Status = status
 		task.UpdatedAt = time.Now().Truncate(time.Minute).Format("2006-01-02 15:04")
-		fmt.Printf(sucTaskMarked, id)
+		fmt.Printf(SucTaskMarked, id)
 		return nil
 	})
 }
