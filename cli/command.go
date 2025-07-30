@@ -2,20 +2,10 @@ package cli
 
 import (
 	"fmt"
+	"github.com/saba1122333/todo-cli/task"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/saba1122333/todo-cli/task"
-)
-
-const (
-	ErrMissingID            = "missing task ID"
-	ErrInvalidNumber        = "Invalid ID, please provide a valid number"
-	ErrWrongNumberArguments = "Wrong number of Arguments"
-	ErrDescription          = "Description cannot be empty."
-	ErrInvalidMarkCommand   = "Invalid MarkCommand, provide a valid Command"
-	ErrMissingCommand       = "missing Command"
 )
 
 func parseID(argIndex int) (int, error) {
