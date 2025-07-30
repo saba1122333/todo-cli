@@ -69,9 +69,11 @@ go run main.go list Done
 Tasks are stored in Tasks.json file in the project root directory. the file is created automaticaly during first run of project.
 
 ## Project structure
+```
 ../
     ├── cli/ # Command-line interface logic
     ├── task/ # Task management and storage
     ├── utils/ # Utility functions
     ├── main.go # Application entry point
     └── Tasks.json # Task data storage
+```
