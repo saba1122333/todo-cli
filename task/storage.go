@@ -31,7 +31,6 @@ func ReadTasks() ([]Task, error) {
 	if err := json.Unmarshal(jsonData, &tasks); err != nil {
 		return tasks, fmt.Errorf(ErrUnMarshal, err)
 	}
-
 	return tasks, nil
 }
 
@@ -52,8 +51,8 @@ func AppendTask(description string) error {
 	if err := WriteTasks(tasks); err != nil {
 		return err // this is already taken care of
 	}
+	fmt.Printf(SucTaskAdded, id)
 	return nil
-
 }
 func DeleteTask(id int) error {
 	tasks, err := ReadTasks()
@@ -79,6 +78,7 @@ func DeleteTask(id int) error {
 	if err := WriteTasks(newTasks); err != nil {
 		return fmt.Errorf(ErrWriteTasks, err)
 	}
+	fmt.Printf(SucTaskDeleted, id)
 	return nil
 }
 
@@ -103,7 +103,9 @@ func ApplyTaskByID(id int, apply func(task *Task) error) error {
 func UpdateTask(id int, description string) error {
 	return ApplyTaskByID(id, func(task *Task) error {
 		task.Description = description
+		task.Status = Todo
 		task.UpdatedAt = time.Now().Truncate(time.Minute).Format("2006-01-02 15:04")
+		fmt.Printf(SucTaskUpdated, id)
 		return nil
 	})
 }
@@ -111,6 +113,7 @@ func MarkTask(id int, status Status) error {
 	return ApplyTaskByID(id, func(task *Task) error {
 		task.Status = status
 		task.UpdatedAt = time.Now().Truncate(time.Minute).Format("2006-01-02 15:04")
+		fmt.Printf(sucTaskMarked, id)
 		return nil
 	})
 }

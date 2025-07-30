@@ -11,3 +11,9 @@ const (
 	ErrWriteTasks    = "failed to write tasks: %w"
 	ErrReadTasks     = "failed to read tasks: %w"
 )
+const (
+	SucTaskAdded   = "Task Added successfully (ID:%v)"
+	SucTaskDeleted = "Task Deleted successfully (ID:%v)"
+	SucTaskUpdated = "Task Updated successfully (ID:%v)"
+	sucTaskMarked  = "Task Marked successfully (ID:%v)"
+)

@@ -112,7 +112,7 @@ func HandleMarkCommand(command string) error {
 	case "mark-done":
 		return task.MarkTask(id, task.Done)
 	}
-	return fmt.Errorf(ErrInvalidMarkCommand)
+	return fmt.Errorf(ErrInvalidMarkCommand, command)
 }
 
 func Run() error {
