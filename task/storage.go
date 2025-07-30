@@ -7,13 +7,24 @@ import (
 	"time"
 )
 
+const (
+	ErrEmptyList     = "to-do list is empty"
+	ErrTaskNotFound  = "task with provided id does not exist"
+	ErrInvalidStatus = "invalid status: %s. Valid statuses are: all, todo, in-progress, done"
+	ErrMarshal       = "failed to marshal tasks: %w"
+	ErrUnMarshal     = "failed to Unmarshal tasks: %w"
+	ErrWriteTasks    = "failed to write tasks: %w"
+	ErrReadTasks     = "failed to read tasks: %w"
+)
+
 func WriteTasks(tasks []Task) error {
 	jsonData, err := json.MarshalIndent(tasks, "", " ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal tasks: %w", err)
+		return fmt.Errorf(ErrMarshal, err)
 	}
 	if err := os.WriteFile(FileName, jsonData, 0644); err != nil {
-		return fmt.Errorf("failed to write tasks: %w", err)
+
+		return fmt.Errorf(ErrWriteTasks, err)
 	}
 	return nil
 }
@@ -21,14 +32,14 @@ func WriteTasks(tasks []Task) error {
 func ReadTasks() ([]Task, error) {
 	jsonData, err := os.ReadFile(FileName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read tasks: %w", err)
+		return nil, fmt.Errorf(ErrReadTasks, err)
 	}
 	if len(jsonData) == 0 {
 		return []Task{}, nil
 	}
 	var tasks []Task
 	if err := json.Unmarshal(jsonData, &tasks); err != nil {
-		return tasks, fmt.Errorf("failed to Unmarshal tasks: %w", err)
+		return tasks, fmt.Errorf(ErrUnMarshal, err)
 	}
 
 	return tasks, nil
@@ -57,10 +68,10 @@ func AppendTask(description string) error {
 func DeleteTask(id int) error {
 	tasks, err := ReadTasks()
 	if err != nil {
-		return fmt.Errorf("failed to read tasks: %w", err)
+		return err
 	}
 	if len(tasks) == 0 {
-		return fmt.Errorf("to-do list is empty")
+		return fmt.Errorf(ErrEmptyList)
 	}
 
 	var newTasks []Task
@@ -73,117 +84,63 @@ func DeleteTask(id int) error {
 		}
 	}
 	if !found {
-		return fmt.Errorf("task with provided id does not exist")
+		return fmt.Errorf(ErrTaskNotFound)
 	}
 	if err := WriteTasks(newTasks); err != nil {
-		return fmt.Errorf("failed to write tasks: %w", err)
+		return fmt.Errorf(ErrWriteTasks, err)
 	}
 	return nil
 }
 
+func ApplyTaskByID(id int, apply func(task *Task) error) error {
+	tasks, err := ReadTasks()
+	if err != nil {
+		return err //  already taken care of
+	}
+	if len(tasks) == 0 {
+		return fmt.Errorf(ErrEmptyList)
+	}
+	for i, v := range tasks {
+		if v.ID == id {
+			if err := apply(&tasks[i]); err != nil {
+				return err
+			}
+			return WriteTasks(tasks)
+		}
+	}
+	return fmt.Errorf(ErrTaskNotFound)
+}
 func UpdateTask(id int, description string) error {
-	tasks, err := ReadTasks()
-	if err != nil {
-		return fmt.Errorf("failed to read tasks: %w", err)
-	}
-	if len(tasks) == 0 {
-		return fmt.Errorf("to-do list is empty")
-	}
-	var newTasks []Task
-	found := false
-	for _, v := range tasks {
-		if v.ID == id {
-			found = true
-			v.Description = description
-			v.UpdatedAt = time.Now().Truncate(time.Minute).Format("2006-01-02 15:04")
-		}
-		newTasks = append(newTasks, v)
-	}
-	if !found {
-		return fmt.Errorf("task with provided id does not exist")
-	}
-	if err := WriteTasks(newTasks); err != nil {
-		return fmt.Errorf("failed to write tasks: %w", err)
-	}
-	return nil
+	return ApplyTaskByID(id, func(task *Task) error {
+		task.Description = description
+		task.UpdatedAt = time.Now().Truncate(time.Minute).Format("2006-01-02 15:04")
+		return nil
+	})
+}
+func MarkTask(id int, status Status) error {
+	return ApplyTaskByID(id, func(task *Task) error {
+		task.Status = status
+		task.UpdatedAt = time.Now().Truncate(time.Minute).Format("2006-01-02 15:04")
+		return nil
+	})
 }
 
-func MarkTaskInProgress(id int) error {
-	tasks, err := ReadTasks()
-	if err != nil {
-		return fmt.Errorf("failed to read tasks: %w", err)
-	}
-	if len(tasks) == 0 {
-		return fmt.Errorf("to-do list is empty")
-	}
-	var newTasks []Task
-	found := false
-	for _, v := range tasks {
-		if v.ID == id {
-			found = true
-			v.Status = Inprogress
-			v.UpdatedAt = time.Now().Truncate(time.Minute).Format("2006-01-02 15:04")
-		}
-		newTasks = append(newTasks, v)
-	}
-	if !found {
-		return fmt.Errorf("task with provided id does not exist")
-	}
-	if err := WriteTasks(newTasks); err != nil {
-		return fmt.Errorf("failed to write tasks: %w", err)
-	}
-	return nil
-}
-
-func MarkTaskDone(id int) error {
-	tasks, err := ReadTasks()
-	if err != nil {
-		return fmt.Errorf("failed to read tasks: %w", err)
-	}
-	if len(tasks) == 0 {
-		return fmt.Errorf("to-do list is empty")
-	}
-	var newTasks []Task
-	found := false
-	for _, v := range tasks {
-		if v.ID == id {
-			found = true
-			v.Status = Done
-			v.UpdatedAt = time.Now().Truncate(time.Minute).Format("2006-01-02 15:04")
-		}
-		newTasks = append(newTasks, v)
-	}
-	if !found {
-		return fmt.Errorf("task with provided id does not exist")
-	}
-	if err := WriteTasks(newTasks); err != nil {
-		return fmt.Errorf("failed to write tasks: %w", err)
-	}
-	return nil
-}
 func ListTasks(status string) error {
+
+	if status != "all" && status != string(Todo) && status != string(Inprogress) && status != string(Done) {
+		return fmt.Errorf(ErrInvalidStatus, status)
+	}
 	tasks, err := ReadTasks()
 	if err != nil {
 		return err
 	}
-	if status != "all" && status != string(Todo) && status != string(Inprogress) && status != string(Done) {
-		return fmt.Errorf("invalid status: %s. Valid statuses are: all, todo, in-progress, done", status)
-	}
-	if status == "all" {
-		for _, v := range tasks {
-			fmt.Println(v.String())
-			fmt.Println()
-		}
-		return nil
-	}
 	for _, v := range tasks {
-		if string(v.Status) == status {
+		if status == "all" || string(v.Status) == status {
 			fmt.Println(v.String())
 			fmt.Println()
 		}
 	}
 	return nil
-
 }
 func generateID() int {
 	tasks, _ := ReadTasks()

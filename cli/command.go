@@ -2,79 +2,148 @@ package cli
 
 import (
 	"fmt"
-	"github.com/saba1122333/todo-cli/task"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/saba1122333/todo-cli/task"
 )
 
-func HandleDeleteCommand() error {
+const (
+	ErrMissingID            = "missing task ID"
+	ErrInvalidNumber        = "Invalid ID, please provide a valid number"
+	ErrWrongNumberArguments = "Wrong number of Arguments"
+	ErrDescription          = "Description cannot be empty."
+	ErrInvalidMarkCommand   = "Invalid MarkCommand, provide a valid Command"
+	ErrMissingCommand       = "missing Command"
+)
 
-	if len(os.Args) < 3 {
-		return fmt.Errorf("missing task ID")
+func parseID(argIndex int) (int, error) {
+	if len(os.Args) <= argIndex {
+		return 0, fmt.Errorf(ErrMissingID)
 	}
-	idStr := strings.TrimSpace(os.Args[2])
+	idStr := strings.TrimSpace(os.Args[argIndex])
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return fmt.Errorf("Invalid ID, please provide a valid number")
+		return -1, fmt.Errorf(ErrInvalidNumber)
 	}
+	return id, nil
+}
+func validArgumentCount(argCount int) error {
+	if len(os.Args) != argCount {
+		return fmt.Errorf(ErrWrongNumberArguments)
+	}
+	return nil
+}
+func getDescription(argIndex int) (string, error) {
 
-	return task.DeleteTask(id)
+	if len(os.Args) <= argIndex {
+		return "", fmt.Errorf(ErrDescription)
+	}
+	description := strings.TrimSpace(os.Args[argIndex])
+	if len(description) == 0 {
+		return "", fmt.Errorf(ErrDescription)
+	}
+	return description, nil
+}
+func parseCommand(argIndex int) (string, error) {
+	if len(os.Args) <= argIndex {
+		return "", fmt.Errorf(ErrMissingCommand)
+	}
+	command := strings.ToLower(os.Args[argIndex])
+	command = strings.TrimSpace(command)
+	return command, nil
 }
 
-func HandleAddCommand() error {
-	if len(os.Args) != 3 {
-		return fmt.Errorf("Wrong number of Arguments")
+func HandleDeleteCommand() error {
+	if err := validArgumentCount(3); err != nil {
+		return err
 	}
-	description := strings.TrimSpace(os.Args[2])
-	if len(description) == 0 {
-		return fmt.Errorf("Description cannot be empty.")
+	id, err := parseID(2)
+	if err != nil {
+		return err
+	}
+	return task.DeleteTask(id)
+}
+func HandleAddCommand() error {
+	if err := validArgumentCount(3); err != nil {
+		return err
+	}
+	description, err := getDescription(2)
+	if err != nil {
+		return err
 	}
 	return task.AppendTask(description)
 }
 
 func HandleUpdateCommand() error {
-	if len(os.Args) != 4 {
-		return fmt.Errorf("Wrong number of arguments")
+
+	if err := validArgumentCount(4); err != nil {
+		return err
 	}
-	idStr, description := strings.TrimSpace(os.Args[2]), strings.TrimSpace(os.Args[3])
-	id, err := strconv.Atoi(idStr)
+	id, err := parseID(2)
+
 	if err != nil {
-		return fmt.Errorf("Invalid ID, please provide valid number")
+		return err
+	}
+	description, err := getDescription(3)
+
+	if err != nil {
+		return err
 	}
 	return task.UpdateTask(id, description)
 }
 func HandleListCommand() error {
-	if len(os.Args) == 2 {
+	err := validArgumentCount(2)
+	if err == nil {
 		return task.ListTasks("all")
 	}
-	if len(os.Args) == 3 {
+	err = validArgumentCount(3)
+	if err == nil {
 		status := os.Args[2]
 		return task.ListTasks(status)
 	}
-	return fmt.Errorf("Wrong number of arguments")
+	return err
 }
 
-func HandleMarkInProgressCommand() error {
-	if len(os.Args) != 3 {
-		return fmt.Errorf("Wrong number of arguments")
-	}
-	idStr := strings.TrimSpace(os.Args[2])
-	id, err := strconv.Atoi(idStr)
+func HandleMarkCommand(command string) error {
+	err := validArgumentCount(3)
 	if err != nil {
-		return fmt.Errorf("Invalid ID, please provide valid number")
+		return err
 	}
-	return task.MarkTaskInProgress(id)
+	id, err := parseID(2)
+
+	if err != nil {
+		return err
+	}
+	switch command {
+	case "mark-in-progress":
+		return task.MarkTask(id, task.Inprogress)
+	case "mark-done":
+		return task.MarkTask(id, task.Done)
+	}
+	return fmt.Errorf(ErrInvalidMarkCommand)
 }
 
-func HandleMarkDoneCommand() error {
-	if len(os.Args) != 3 {
-		return fmt.Errorf("Wrong number of arguments")
-	}
-	idStr := strings.TrimSpace(os.Args[2])
-	id, err := strconv.Atoi(idStr)
+func Run() error {
+
+	command, err := parseCommand(1)
 	if err != nil {
-		return fmt.Errorf("Invalid ID, please provide valid number")
+		return err
 	}
-	return task.MarkTaskDone(id)
+	switch command {
+	case "add":
+		err = HandleAddCommand()
+	case "delete":
+		err = HandleDeleteCommand()
+	case "update":
+		err = HandleUpdateCommand()
+	case "list":
+		err = HandleListCommand()
+	case "mark-in-progress", "mark-done":
+		err = HandleMarkCommand(command)
+	default:
+		err = fmt.Errorf("unknown command: %s", command)
+	}
+	return err
 }
