@@ -5,13 +5,13 @@ import (
 	"os"
 )
 
-func fileExists() bool {
+func FileExists() bool {
 	_, err := os.Stat(task.FileName)
 	return err == nil || !os.IsNotExist(err)
 }
 
 func CheckOrCreate() {
-	if !fileExists() {
+	if !FileExists() {
 		file, err := os.Create(task.FileName)
 		for err != nil {
 			file, err = os.Create(task.FileName)

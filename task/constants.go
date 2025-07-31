@@ -1,6 +1,9 @@
 package task
 
-const FileName string = "Tasks.json"
+var FileName string = "Tasks.json"
+
+// this should not be const or var but I am new and FileName being const was not cutting it
+//  for next time I will write tests along the way which will help me see a better way
 
 const (
 	ErrEmptyList     = "to-do list is empty"
