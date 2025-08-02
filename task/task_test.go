@@ -44,8 +44,8 @@ func TestReadWriteTasks(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			setup()
 			defer destroy()
-			err := WriteTasks(tc.tasks)
-			if err != nil {
+
+			if err := WriteTasks(tc.tasks); err != nil {
 				t.Fatalf("Failed to Write %v", err)
 			}
 			written, err := ReadTasks()
