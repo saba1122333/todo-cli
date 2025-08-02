@@ -22,6 +22,9 @@ func WriteTasks(tasks []Task) error {
 func ReadTasks() ([]Task, error) {
 	jsonData, err := os.ReadFile(FileName)
 	if err != nil {
+		_, err = os.Create(FileName)
+	}
+	if err != nil {
 		return nil, fmt.Errorf(ErrReadTasks, err)
 	}
 	if len(jsonData) == 0 {
@@ -118,22 +121,24 @@ func MarkTask(id int, status Status) error {
 	})
 }
 
-func ListTasks(status string) error {
-
-	if status != "all" && status != string(Todo) && status != string(Inprogress) && status != string(Done) {
-		return fmt.Errorf(ErrInvalidStatus, status)
+func ListTasks(status string) ([]Task, error) {
+	valid := status == "all" || status == string(Todo) || status == string(Inprogress) || status == string(Done)
+	if !valid {
+		return nil, fmt.Errorf(ErrInvalidStatus, status)
 	}
 	tasks, err := ReadTasks()
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var filtered []Task
 	for _, v := range tasks {
 		if status == "all" || string(v.Status) == status {
+			filtered = append(filtered, v)
 			fmt.Println(v.String())
 			fmt.Println()
 		}
 	}
-	return nil
+	return filtered, nil
 }
 func generateID() int {
 	tasks, _ := ReadTasks()

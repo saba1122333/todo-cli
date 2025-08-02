@@ -84,25 +84,25 @@ func HandleUpdateCommand() error {
 	return task.UpdateTask(id, description)
 }
 func HandleListCommand() error {
-	err := validArgumentCount(2)
-	if err == nil {
-		return task.ListTasks("all")
+
+	if err := validArgumentCount(2); err == nil {
+		_, err := task.ListTasks("all")
+		return err
 	}
-	err = validArgumentCount(3)
-	if err == nil {
+	if err := validArgumentCount(3); err == nil {
 		status := os.Args[2]
-		return task.ListTasks(status)
+		_, err := task.ListTasks(status)
+		return err
 	}
-	return err
+	return nil
 }
 
 func HandleMarkCommand(command string) error {
-	err := validArgumentCount(3)
-	if err != nil {
+
+	if err := validArgumentCount(3); err != nil {
 		return err
 	}
 	id, err := parseID(2)
-
 	if err != nil {
 		return err
 	}
