@@ -2,10 +2,11 @@ package cli
 
 import (
 	"fmt"
-	"github.com/saba1122333/todo-cli/task"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/saba1122333/todo-cli/task"
 )
 
 func parseID(argIndex int) (int, error) {
@@ -94,7 +95,7 @@ func HandleListCommand() error {
 		_, err := task.ListTasks(status)
 		return err
 	}
-	return nil
+	return fmt.Errorf(ErrWrongNumberArguments)
 }
 
 func HandleMarkCommand(command string) error {
